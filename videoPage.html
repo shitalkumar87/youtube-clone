@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+    <title>Youtube</title>
+    <link rel="stylesheet" href="navbar.css" />
+    <link rel="stylesheet" href="videoPage.css" />
+  </head>
+
+  <body>
+    <nav class="navbar">
+      <div class="toggle-btn">
+        <i class="material-icons">menu</i>
+      </div>
+      <a href="index.html">
+        <img
+          src="https://icon-library.com/images/youtube-logo-icon-png/youtube-logo-icon-png-25.jpg"
+          class="logo"
+          alt="logo"
+      /></a>
+      <div class="search-box">
+        <input type="text" class="search-bar" placeholder="search" />
+        <button class="search-btn">
+          <img
+            src="https://www.freeiconspng.com/thumbs/search-icon-png/search-icon-png-21.png"
+            alt=""
+          />
+        </button>
+        <div>
+          <img src="http://cdn.onlinewebfonts.com/svg/img_262554.png" alt="" />
+        </div>
+      </div>
+      <div class="user-options">
+        <i class="material-icons">  videocam</i>
+        <i class="material-icons">apps</i>
+        
+        <i class="material-icons">account_circle</i>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="video-container"></div>
+      <div class="sidebar-container">
+        <div class="filters">
+          <button class="filter-options active">All</button>
+          <button class="filter-options">Ai</button>
+          <button class="filter-options">Technology</button>
+          <button class="filter-options">Coding</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+   let api_key="AIzaSyApiHM2WjLYK7jtxrFo8v2SUHa9HzHnYOo"
+  let getData = async () => {
+    
+    let id = JSON.parse(localStorage.getItem("details"));
+    try {
+      let res = await fetch(
+        `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${id}&key=${api_key}`
+      );
+      let data = await res.json();
+      showVideo(data.items[0]);
+      console.log(data.items[0]);
+    } catch (err) {}
+  };
+  getData();
+  function showVideo(data) {
+    document.querySelector(".video-container").innerHTML = "";
+    document.querySelector(".video-container").innerHTML = `
+
+
+    <iframe src="https://www.youtube.com/embed/${data.id}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          class="video"
+        ></iframe>
+        <p class="title">
+              ${data.snippet.title}
+        </p>
+        <p class="description">
+          <span class="count">${data.statistics.viewCount} views</span>  ${data.snippet.localized.description}
+        </p>
+        <div class="features">
+          <span>
+            <img
+              src="https://www.freepnglogos.com/uploads/like-png/like-icon-line-iconset-iconsmind-35.png"
+              alt="logo"
+            />
+            Like
+          </span>
+          <span>
+            <img
+              src="https://www.pngitem.com/pimgs/m/100-1009576_dislike-png-icon-transparent-png.png"
+              alt="logo"
+            />
+            Dislike
+          </span>
+          <span>
+            <img
+              src="https://snipstock.com/assets/cdn/png/c8c854900836c846e2f82f0126726187.png"
+              alt="logo"
+            />
+            Share
+          </span>
+          <span>
+            <img
+              src="https://www.pngitem.com/pimgs/m/168-1682832_cut-clipart-scissors-icon-scissors-icon-png-transparent.png"
+              alt="logo"
+            />
+            Clip
+          </span>
+          <span>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/1828/1828930.png"
+              alt="logo"
+            />
+            Save
+          </span>
+          <span>
+            <img
+              src="https://cdn0.iconfinder.com/data/icons/modern-ui-1/64/dots-horizontal-nav-more-512.png"
+              alt="logo"
+            />
+          </span>
+        </div>
+        
+        </div>
+
+
+`;
+  }
+  let popular = async () => {
+    try {
+      let res = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key=${api_key}&maxResults=15&regionCode=US&videoCategoryId=10`
+      );
+      let data = await res.json();
+      showPopular(data.items);
+    } catch (err) {}
+  };
+  popular();
+  function showPopular(data) {
+    data.forEach((elem) => {
+      let div = document.createElement("div");
+      div.setAttribute("class", "sidebar-video");
+      div.innerHTML = `
+    <img src="${elem.snippet.thumbnails.high.url}"
+    alt="" class="video-thumbnail" />
+    <div class="video-info">
+           <h4 class="video-title">${elem.snippet.title}</h4>
+           <p class="video-channel-name">
+           ${elem.snippet.channelTitle}
+           </p>
+    </div>
+   `;
+      document.querySelector(".sidebar-container").append(div);
+      div.addEventListener("click", () => {
+        localStorage.setItem("details", JSON.stringify(elem.id));
+        window.location = "videoPage.html";
+      });
+    });
+  }
+</script>
